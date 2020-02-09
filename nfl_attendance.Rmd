@@ -1,0 +1,33 @@
+---
+title: "NFL Attendance"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+
+
+
+```{r cars}
+
+
+
+attendance <-
+    read_csv(
+        "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-04/attendance.csv"
+    )
+standings <-
+    read_csv(
+        "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-04/standings.csv"
+    )
+
+attendance_joined <- attendance %>%
+    left_join(standings,
+              by = c("year", "team_name", "team"))
+
+attendance_joined
+```
+
