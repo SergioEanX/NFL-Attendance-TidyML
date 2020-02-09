@@ -1,27 +1,10 @@
----
-title: "NFL Attendance"
-date: "`r Sys.Date()`"
-output: github_document
-editor_options: 
-  chunk_output_type: console
----
-
-```{r setup, include=FALSE}
-# install.packages("remotes")
-# remotes::install_github("juliasilge/silgelib")
-library(knitr)
-knitr::opts_chunk$set(echo = TRUE, cache = TRUE, warning = FALSE, message = FALSE,
-                      dpi=180, fig.width = 8, fig.height = 5)
-library(tidyverse)
-library(dplyr)
-# library(silgelib)
-# theme_set(theme_plex())
-```
-
+NFL Attendance
+================
+2020-02-09
 
 ## Explore Data
 
-```{r EDA}
+``` r
 attendance <-
     read_csv(
         "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-04/attendance.csv" , progress = TRUE
@@ -41,8 +24,7 @@ attendance_joined$playoffs <- factor(attendance_joined$playoffs)
 attendance_joined$sb_winner <- factor(attendance_joined$sb_winner)
 ```
 
-
-```{r}
+``` r
 attendance_joined %>% filter(!is.na(weekly_attendance)) %>%
     ggplot(aes(x=
     fct_reorder(team_name,weekly_attendance), 
@@ -52,7 +34,9 @@ attendance_joined %>% filter(!is.na(weekly_attendance)) %>%
     coord_flip() + theme_minimal()
 ```
 
-```{r}
+![](nfl_attendance_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+
+``` r
 attendance_joined %>% distinct(team_name,
                                year, margin_of_victory,
                                playoffs) %>%
@@ -61,7 +45,9 @@ attendance_joined %>% distinct(team_name,
     geom_histogram(position = 'identity', alpha=0.7)
 ```
 
-```{r}
+![](nfl_attendance_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+``` r
 attendance_joined %>%
   mutate(week = factor(week)) %>%
   ggplot(aes(week, weekly_attendance, fill = week)) +
@@ -72,8 +58,9 @@ attendance_joined %>%
   )+ theme_minimal()
 ```
 
+![](nfl_attendance_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
-```{r}
+``` r
 attendance_df <- attendance_joined %>%
   filter(!is.na(weekly_attendance)) %>%
   select(
@@ -84,9 +71,21 @@ attendance_df <- attendance_joined %>%
 attendance_df
 ```
 
+    ## # A tibble: 10,208 x 7
+    ##    weekly_attendan… team_name  year  week margin_of_victo… strength_of_sch…
+    ##               <dbl> <fct>     <dbl> <dbl>            <dbl>            <dbl>
+    ##  1            77434 Cardinals  2000     1            -14.6             -0.7
+    ##  2            66009 Cardinals  2000     2            -14.6             -0.7
+    ##  3            71801 Cardinals  2000     4            -14.6             -0.7
+    ##  4            66985 Cardinals  2000     5            -14.6             -0.7
+    ##  5            44296 Cardinals  2000     6            -14.6             -0.7
+    ##  6            38293 Cardinals  2000     7            -14.6             -0.7
+    ##  7            62981 Cardinals  2000     8            -14.6             -0.7
+    ##  8            35286 Cardinals  2000     9            -14.6             -0.7
+    ##  9            52244 Cardinals  2000    10            -14.6             -0.7
+    ## 10            64223 Cardinals  2000    11            -14.6             -0.7
+    ## # … with 10,198 more rows, and 1 more variable: playoffs <fct>
+
 ## Train model
 
-
-
 ## Evaluate model
-
