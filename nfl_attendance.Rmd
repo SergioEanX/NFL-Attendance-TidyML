@@ -85,8 +85,145 @@ attendance_df
 ```
 
 ## Train model
+```{r}
+library(tidymodels)
+set.seed(1234)
+attendance_split <- attendance_df %>%
+  initial_split(strata = playoffs)
+attendance_split
+nfl_train <- training(attendance_split)
+nfl_test <- testing(attendance_split)
+
+nfl_train
+
+nfl_test
+```
+
+```{r MLR}
+lm_spec <- linear_reg() %>%
+  set_engine(engine = "lm")
+
+lm_spec
+
+lm_fit <- lm_spec %>%
+  fit(weekly_attendance ~ .,
+    data = nfl_train
+  )
+
+lm_fit
+```
+
+```{r RandomForest}
+
+rf_spec <- rand_forest(mode = "regression") %>%
+  set_engine("ranger")
+
+rf_spec
+
+rf_fit <- rf_spec %>%
+  fit(weekly_attendance ~ .,
+    data = nfl_train
+  )
+
+rf_fit
+```
 
 
 
 ## Evaluate model
+
+```{r}
+results_train <- lm_fit %>%
+  predict(new_data = nfl_train) %>%
+  mutate(
+    truth = nfl_train$weekly_attendance,
+    model = "lm"
+  ) %>%
+  bind_rows(rf_fit %>%
+    predict(new_data = nfl_train) %>%
+    mutate(
+      truth = nfl_train$weekly_attendance,
+      model = "rf"
+    ))
+
+results_test <- lm_fit %>%
+  predict(new_data = nfl_test) %>%
+  mutate(
+    truth = nfl_test$weekly_attendance,
+    model = "lm"
+  ) %>%
+  bind_rows(rf_fit %>%
+    predict(new_data = nfl_test) %>%
+    mutate(
+      truth = nfl_test$weekly_attendance,
+      model = "rf"
+    ))
+```
+
+```{r}
+results_train %>%
+  group_by(model) %>%
+  rmse(truth = truth, estimate = .pred)
+
+results_test %>%
+  group_by(model) %>%
+  rmse(truth = truth, estimate = .pred)
+```
+
+
+```{r}
+results_test %>%
+  mutate(train = "testing") %>%
+  bind_rows(results_train %>%
+    mutate(train = "training")) %>%
+  ggplot(aes(truth, .pred, color = model)) +
+  geom_abline(lty = 2, color = "gray80", size = 1.5) +
+  geom_point(alpha = 0.5) +
+  facet_wrap(~train) +
+  labs(
+    x = "Truth",
+    y = "Predicted attendance",
+    color = "Type of model"
+  )+ theme_minimal()
+```
+
+
+## Let' try again   
+
+[Parsnip](https://tidymodels.github.io/parsnip/)   
+
+
+```{r}
+set.seed(1234)
+rf_spec <- rand_forest(mode = "regression", trees = 50,min_n = 20 ) %>%
+  set_engine("ranger")
+
+nfl_folds <- vfold_cv(nfl_train, strata = playoffs)
+
+rf_res <- fit_resamples(
+  weekly_attendance ~ .,
+  rf_spec,
+  nfl_folds,
+  control = control_resamples(save_pred = TRUE)
+)
+
+rf_res %>%
+  collect_metrics()
+```
+
+```{r}
+
+rf_res %>%
+  unnest(.predictions) %>%
+  ggplot(aes(weekly_attendance, .pred, color = id)) +
+  geom_abline(lty = 2, color = "gray80", size = 1.5) +
+  geom_point(alpha = 0.5) +
+  labs(
+    x = "Truth",
+    y = "Predicted game attendance",
+    color = NULL
+  )
+```
+
+
 

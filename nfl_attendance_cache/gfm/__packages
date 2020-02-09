@@ -9,3 +9,15 @@ purrr
 dplyr
 stringr
 forcats
+tidymodels
+broom
+scales
+dials
+parsnip
+discrim
+infer
+recipes
+rsample
+tune
+workflows
+yardstick
